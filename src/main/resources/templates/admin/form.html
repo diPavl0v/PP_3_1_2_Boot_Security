@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-<h2 th:text="${user != null and user.id != null} ? 'Edit user' : 'Add user'">Form</h2>
-<form th:action="@{/saveUser}" method="post">
-    <input type="hidden" name="id" th:value="${user.id}"/>
-    Name: <input name="name" th:value="${user.name}"/><br/>
-    Email: <input name="email" th:value="${user.email}"/><br/>
-    Age: <input type="number" name="age" th:value="${user.age}"/><br/>
-    <input type="submit" value="Save"/>
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body>
+<h2 th:text="${user.id} == null ? 'Create' : 'Edit'"></h2>
+<form th:action="${user.id} == null ? @{/admin} : @{'/admin/' + ${user.id}}" method="post" th:object="${user}">
+    <div><label>Username</label><input th:field="*{username}"></div>
+    <div><label>Password</label><input th:field="*{password}" type="password"></div>
+    <button type="submit">Save</button>
 </form>
-<a th:href="@{/users}">Back</a>
-</body>
-</html>
+<a th:href="@{/admin}">Back</a>
+</body></html>

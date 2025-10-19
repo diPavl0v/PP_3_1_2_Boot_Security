@@ -1,23 +1,19 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-<h2>Users</h2>
-<a th:href="@{/userForm}">Add</a>
-<table border="1">
-    <tr><th>ID</th><th>Name</th><th>Email</th><th>Age</th><th>Actions</th></tr>
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body>
+<h2>Admin</h2>
+<a th:href="@{/admin/new}">New user</a>
+<table>
+    <tr><th>ID</th><th>Username</th><th>Roles</th><th>Actions</th></tr>
     <tr th:each="u : ${users}">
-        <td th:text="${u.id}">1</td>
-        <td th:text="${u.name}">Name</td>
-        <td th:text="${u.email}">mail</td>
-        <td th:text="${u.age}">0</td>
+        <td th:text="${u.id}"></td>
+        <td th:text="${u.username}"></td>
+        <td th:text="${#strings.listJoin(u.authorities, ', ')}"></td>
         <td>
-            <a th:href="@{/userForm(id=${u.id})}">Edit</a>
-            <form th:action="@{/deleteUser}" method="post" style="display:inline">
-                <input type="hidden" name="id" th:value="${u.id}"/>
-                <input type="submit" value="Delete"/>
+            <a th:href="@{'/admin/' + ${u.id} + '/edit'}">edit</a>
+            <form th:action="@{'/admin/' + ${u.id} + '/delete'}" method="post" style="display:inline">
+                <button type="submit">delete</button>
             </form>
         </td>
     </tr>
 </table>
-</body>
-</html>
+<form th:action="@{/logout}" method="post"><button>Logout</button></form>
+</body></html>
