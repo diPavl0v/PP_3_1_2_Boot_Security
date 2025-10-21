@@ -3,26 +3,66 @@ package ru.kata.spring.boot_security.demo.web;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-@Controller @RequestMapping("/admin")
+@Controller
+@RequestMapping("/admin")
 public class AdminUserController {
-    private final UserService users;
-    private final RoleRepository roles;
 
-    public AdminUserController(UserService users, RoleRepository roles) { this.users=users; this.roles=roles; }
+    private final UserService userService;
 
-    @GetMapping public String index(Model m){ m.addAttribute("users", users.findAll()); return "admin/index"; }
+    public AdminUserController(UserService userService) { this.userService = userService; }
 
-    @GetMapping("/new") public String createForm(Model m){ m.addAttribute("user", new User()); m.addAttribute("roles", roles.findAll()); return "admin/form"; }
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("users", userService.findAll());
+        return "admin/index";
+    }
 
-    @PostMapping public String create(@ModelAttribute User user){ users.create(user); return "redirect:/admin"; }
+    @GetMapping("/new")
+    public String createForm(Model model) {
+        model.addAttribute("user", new User());
+        return "admin/form";
+    }
 
-    @GetMapping("/{id}/edit") public String edit(@PathVariable Long id, Model m){ m.addAttribute("user", users.findById(id)); m.addAttribute("roles", roles.findAll()); return "admin/form"; }
+    @PostMapping
+    public String create(@ModelAttribute User user, RedirectAttributes ra) {
+        try {
+            userService.create(user);
+            ra.addFlashAttribute("ok", "User created");
+            return "redirect:/admin";
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("error", ex.getMessage());
+            ra.addFlashAttribute("user", user);
+            return "redirect:/admin/new";
+        }
+    }
 
-    @PostMapping("/{id}") public String update(@PathVariable Long id, @ModelAttribute User user){ users.update(id, user); return "redirect:/admin"; }
+    @GetMapping("/{id}/edit")
+    public String editForm(@PathVariable Long id, Model model) {
+        model.addAttribute("user", userService.findById(id));
+        return "admin/form";
+    }
 
-    @PostMapping("/{id}/delete") public String delete(@PathVariable Long id){ users.delete(id); return "redirect:/admin"; }
+    @PostMapping("/{id}")
+    public String update(@PathVariable Long id, @ModelAttribute User user, RedirectAttributes ra) {
+        try {
+            userService.update(id, user);
+            ra.addFlashAttribute("ok", "User updated");
+            return "redirect:/admin";
+        } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("error", ex.getMessage());
+            ra.addFlashAttribute("user", user);
+            return "redirect:/admin/" + id + "/edit";
+        }
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+        userService.delete(id);
+        ra.addFlashAttribute("ok", "User deleted");
+        return "redirect:/admin";
+    }
 }

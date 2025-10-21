@@ -10,13 +10,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import ru.kata.spring.boot_security.demo.security.LoginSuccessHandler;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-@Configuration @EnableWebSecurity
+@Configuration
+@EnableWebSecurity
 public class WebSecurityConfig {
 
-    @Bean public PasswordEncoder passwordEncoder(){ return new BCryptPasswordEncoder(); }
+    @Bean
+    public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
 
     @Bean
     public AuthenticationManager authManager(HttpSecurity http, UserDetailsService uds, PasswordEncoder pe) throws Exception {
@@ -26,9 +28,9 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationSuccessHandler successHandler) throws Exception {
-        http.csrf().disable()
-                .authorizeRequests()                      // ← тут
-                .antMatchers("/login","/css/**","/js/**").permitAll()
+        http
+                .authorizeRequests()
+                .antMatchers("/login", "/error", "/css/**", "/js/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user").hasAnyRole("USER","ADMIN")
                 .anyRequest().authenticated()
@@ -44,6 +46,6 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-
-    @Bean public AuthenticationSuccessHandler successHandler(){ return new LoginSuccessHandler(); }
+    @Bean
+    public AuthenticationSuccessHandler successHandler() { return new LoginSuccessHandler(); }
 }
