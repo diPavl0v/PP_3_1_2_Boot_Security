@@ -9,7 +9,7 @@ public record UserUpsertDto(String username, String password, String firstName, 
     public User toEntity(Set<Role> resolvedRoles){
         User u = new User();
         u.setUsername(username);
-        u.setPassword(password); // сервис сам заэнкодит и пропустит пустое при update
+        u.setPassword(password);
         u.setFirstName(firstName);
         u.setLastName(lastName);
         u.setAge(age);
