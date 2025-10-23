@@ -42,7 +42,7 @@ public class DataInit {
                     u.setRoles(Set.of(rUser));
                     userRepo.save(u);
                 } catch (DataIntegrityViolationException ex) {
-
+                }
             }
         };
     }
