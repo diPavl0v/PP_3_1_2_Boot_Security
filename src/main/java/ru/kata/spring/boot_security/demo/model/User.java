@@ -1,18 +1,19 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "username")
-})
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "username"))
 public class User implements UserDetails {
 
     @Id
@@ -20,15 +21,22 @@ public class User implements UserDetails {
     private Long id;
 
     @NotBlank
-    @Column(nullable = false, unique = true)
+    @Size(min = 3, max = 64)
+    @Column(nullable = false, unique = true, length = 64)
     private String username;
 
     @NotBlank
-    @Column(nullable = false)
+    @Size(min = 4, max = 255)
+    @Column(nullable = false, length = 255)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // не отдаём пароль в JSON
     private String password;
 
+    @Size(max = 100)
     private String firstName;
+
+    @Size(max = 100)
     private String lastName;
+
     private Integer age;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -39,91 +47,38 @@ public class User implements UserDetails {
 
     public User() {}
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     @Override
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
     @Override
-    public String getPassword() {
-        return password;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
 
-    public String getFirstName() {
-        return firstName;
-    }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+    public Integer getAge() { return age; }
+    public void setAge(Integer age) { this.age = age; }
 
-    public String getLastName() {
-        return lastName;
-    }
+    public Set<Role> getRoles() { return roles == null ? new HashSet<>() : roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    // Для Spring Security
+    @JsonIgnore
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
-    }
+    public Collection<? extends GrantedAuthority> getAuthorities() { return getRoles(); }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    @JsonIgnore @Override public boolean isAccountNonExpired() { return true; }
+    @JsonIgnore @Override public boolean isAccountNonLocked() { return true; }
+    @JsonIgnore @Override public boolean isCredentialsNonExpired() { return true; }
+    @JsonIgnore @Override public boolean isEnabled() { return true; }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    // equals/hashCode по username
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -133,16 +88,10 @@ public class User implements UserDetails {
     }
 
     @Override
-    public int hashCode() {
-        return username != null ? username.hashCode() : 0;
-    }
+    public int hashCode() { return username != null ? username.hashCode() : 0; }
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", roles=" + roles +
-                '}';
+        return "User{id=" + id + ", username='" + username + "', roles=" + roles + "}";
     }
 }
